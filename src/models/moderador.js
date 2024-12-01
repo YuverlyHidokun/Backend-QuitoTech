@@ -46,7 +46,7 @@ const moderadorSchema = new Schema({
     }
   },
   {
-    timestamps: true, // Usa `timestamps` para `createdAt` y `updatedAt`
+    timestamps: true, // Usa timestamps para createdAt y updatedAt
   }
 );
 
@@ -76,6 +76,6 @@ moderadorSchema.methods.matchPassword = async function(password) {
 };
 
 // Crear y exportar el modelo
-// const Moderador = mongoose.model("Moderador", moderadorSchema);
+// const Moderador = mongoose.model("Moderador", moderadorSchema); esto le quite porque estaba de forma incorrecta le hice yo mismo que orgullo xd
 
 export default model('Moderador',moderadorSchema);

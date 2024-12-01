@@ -5,16 +5,24 @@ import {
     registrarProducto,
     actualizarProducto,
     eliminarProducto,
-    cambiarEstado
+    cambiarEstado,
+    obtenerProductos,
+    ProductosInactivos,
+    listarproductosporCategoria
 } from "../controllers/productos_controller.js";
 import verificarAutenticacion from "../middlewares/autenticacion.js";
 
 const router = Router();
 
-router.post('/producto/registro', verificarAutenticacion, upload.single('image'), registrarProducto);
+// ! verificarAutenticacion
+
+router.post('/producto/registro', registrarProducto);
 router.get('/producto/:id', detalleProducto);
-router.put('/producto/:id', verificarAutenticacion, upload.single('image'), actualizarProducto);
-router.delete('/producto/:id', verificarAutenticacion, eliminarProducto);
-router.post('/producto/estado/:id', verificarAutenticacion, cambiarEstado);
+router.get('/productos/enstock', obtenerProductos);
+router.get('/productos/enstock/:Categoria', listarproductosporCategoria);
+router.get('/productos/sinstock', ProductosInactivos);
+router.put('/producto/:id',actualizarProducto);
+router.put('/producto/estado/:id',cambiarEstado);
+router.delete('/producto/:id',eliminarProducto);
 
 export default router;

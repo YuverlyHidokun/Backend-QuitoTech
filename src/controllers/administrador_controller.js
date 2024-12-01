@@ -5,7 +5,7 @@ import generarJWT from "../helpers/crearJWT.js";
 import mongoose from "mongoose";
 import Tienda from "../models/tienda.js";
 import Producto from "../models/producto.js";
-import usuario from "../models/usuario.js";
+import Usuario from "../models/usuarios.js";
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -542,65 +542,6 @@ const obtenerModerador = async (req, res) => {
   }
 };
 
-const mostrarUsuarioPorId = async (req, res) => {
-  const { id } = req.params; // Obtener el ID del parámetro de la solicitud
-
-  try {
-    // Verificar que el ID es válido en MongoDB
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ msg: "ID no válido" });
-    }
-
-    // Intentar buscar en la colección Usuario
-    const usuarioEncontrado = await usuario.findById(id)
-      .select("-password -token") // Excluir campos sensibles
-      .lean();
-
-    // Si no se encuentra el usuario
-    if (!usuarioEncontrado) {
-      return res.status(404).json({ msg: "Usuario no encontrado" });
-    }
-
-    // Responder con los datos del usuario encontrado
-    res.status(200).json(usuarioEncontrado);
-  } catch (error) {
-    console.error("Error al buscar usuario por ID:", error);
-    res.status(500).json({ msg: "Error interno del servidor" });
-  }
-};
-
-const obtenerProductosPorMes = async (req, res) => {
-  try {
-    const productosPorMes = await Producto.aggregate([
-      {
-        $group: {
-          _id: {
-            año: { $year: "$createdAt" }, // Obtenemos el año de la fecha de creación
-            mes: { $month: "$createdAt" }  // Obtenemos el mes de la fecha de creación
-          },
-          total: { $sum: 1 }  // Contamos la cantidad de productos por mes
-        }
-      },
-      {
-        $sort: { "_id.año": 1, "_id.mes": 1 }  // Ordenamos primero por año y luego por mes
-      },
-      {
-        $project: {
-          _id: 0,
-          año: "$_id.año",  // Mostramos el año
-          mes: "$_id.mes",   // Mostramos el mes
-          total: 1           // Mostramos el total de productos
-        }
-      }
-    ]);
-
-    res.status(200).json(productosPorMes);  // Retornamos el resultado al cliente
-  } catch (error) {
-    console.error(error);  // Capturamos cualquier error
-    res.status(500).json({ msg: "Hubo un error al obtener los productos por mes", error: error.message });
-  }
-};
-
 export {
   login,
   registro,
@@ -626,8 +567,6 @@ export {
   listarEstadisticas,
   obtenerUltimos10Productos,
   obtenerTiendaPorId,
-  obtenerModerador,
-  mostrarUsuarioPorId,
-  obtenerProductosPorMes
+  obtenerModerador
 };
 

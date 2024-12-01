@@ -24,9 +24,7 @@ import {
   listarEstadisticas,
   obtenerUltimos10Productos,
   obtenerTiendaPorId,
-  obtenerModerador,
-  mostrarUsuarioPorId,
-  obtenerProductosPorMes
+  obtenerModerador
 } from "../controllers/administrador_controller.js";
 
 const router = Router();
@@ -75,7 +73,4 @@ router.get('/administrador/tienda/:id', obtenerTiendaPorId);
 
 router.get("/administrador/moderador/:id", obtenerModerador);
 
-router.get("/administrador/usuario/:id", mostrarUsuarioPorId);
-
-router.get('/administrador/productos/por-mes', obtenerProductosPorMes);
 export default router;

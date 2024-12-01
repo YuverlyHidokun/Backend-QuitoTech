@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from 'mongoose';
 
 const ProductoSchema = new Schema({
-    Nombre_producto: {
+    Nombre: {
         type: String,
         required: true,
         trim: true,
@@ -19,9 +19,25 @@ const ProductoSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tienda',
     },
+    promedio_calificacion: {
+        type: Number,
+        default: 0
+    },
+    Cantidad: {
+        type: Number,
+        default: 0
+    },
+    precio:{
+        type:Number,
+        default: 0
+    },
     imagenUrl: {
         type: String,
         required: false,
+    },
+    imagenPublicId: {
+        type: String,
+        required: true
     },
 }, {
     timestamps: true,

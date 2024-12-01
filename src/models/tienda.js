@@ -1,23 +1,21 @@
 import mongoose, {Schema,model} from 'mongoose'
 import bcrypt from "bcryptjs"
 const TiendaSchema = new Schema({
-    Nombre_tienda:{
+    Nombre:{
         type:String,
         require:true,
-        trim:true
     },
     Direccion:{
         type:String,
         require:true,
-        trim:true
     },
     Verificado:{
         type:Boolean,
         default:false
     },
-    id_usuario:{
+    id_propietario:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Usuario'
+        ref:'Propietario'
     }
     
 },{

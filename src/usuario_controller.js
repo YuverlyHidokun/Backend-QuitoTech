@@ -253,7 +253,6 @@ const solicitarTienda = async (req, res) => {
     }
 };
 
-
 const obtenerTiendaConProductos = async (req, res) => {
     const { id } = req.params;
   
@@ -330,7 +329,6 @@ const obtenerTiendaDelpropietario = async (req, res) => {
       res.status(500).json({ msg: 'Error al obtener la tienda', error });
     }
   };
-
 
 export {
     // ! Rutas de propietario
