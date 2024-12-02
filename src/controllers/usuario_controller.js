@@ -73,18 +73,40 @@ const registro = async (req, res) => {
   
 
 const confirmEmail = async (req,res)=>{
-    //: ACTIVIDAD 1
-    if(!(req.params.token)) return res.status(400).json({msg:"Lo sentimos, no se puede validar la cuenta"})
+  const { token } = req.params;
 
-    const propietarioBDD = await Usuario.findOne({token:req.params.token})
-    if(!propietarioBDD?.token) return res.status(404).json({msg:"Algo ha ocurrido, parece que la cuenta ya ha sido confirmada"})
+  // Validación de token
+  if (!token) return res.status(400).json({ msg: "Token no proporcionado" });
 
-    propietarioBDD.token = null
-    propietarioBDD.confirmEmail=true
-    await propietarioBDD.save()
+  // Buscar usuario por token
+  const propietario = await Usuario.findOne({ token });
+  if (!propietario) return res.status(404).json({ msg: "Token inválido o usuario no encontrado" });
 
-    res.status(200).json({msg:"Felicidades su cuenta ha sido confirmada, puede iniciar sesion"}) 
-} // * BIEN
+  // Verificar si el token es para email o tienda
+  if (!propietario.confirmEmail) {
+      // Confirmación de email
+      propietario.confirmEmail = true;
+      propietario.token = null;
+      await propietario.save();
+
+      return res.status(200).json({ msg: "Correo electrónico confirmado con éxito, ahora puede iniciar sesión." });
+  } else if (!propietario.propietario) {
+      // Confirmación de tienda
+      const tienda = await Tienda.findOne({ id_propietario: propietario._id });
+      if (!tienda) return res.status(404).json({ msg: "Tienda no encontrada" });
+
+      tienda.Verificado = true;
+      propietario.token = null;
+      propietario.propietario = true;
+
+      await tienda.save();
+      await propietario.save();
+
+      return res.status(200).json({ msg: "Negocio verificado, la tienda ha sido aprobada!" });
+  } else {
+      return res.status(400).json({ msg: "La cuenta ya ha sido completamente confirmada." });
+  }
+};
 const actualizarPerfil = async (req,res)=>{
     const {id} = req.params
     if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:'Lo sentimos, debe ser un id válido'});
