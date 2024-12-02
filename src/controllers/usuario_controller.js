@@ -8,24 +8,21 @@ import { v2 as cloudinary } from 'cloudinary';
 
 
 const registro = async (req, res) => {
-  const { nombre, apellido, email, password, Numero, NombreTienda, DireccionTienda } = req.body;
-
-  // Verifica que todos los campos obligatorios estén presentes
-  if (
-    Object.values(req.body).includes("") ||
-    !req.files || !req.files.imagen
-  ) {
-    return res.status(400).json({ msg: "Todos los campos, incluyendo la tienda, y la imagen son obligatorios" });
-  }
+  const { nombre, apellido, email, password, Numero, Nombre, Direccion, alerta_cantidad, ImagenUrl} = req.body;
 
   try {
-    // Verifica si el email ya está registrado
+    // Verificar que todos los campos obligatorios estén presentes en el registro
+    if (Object.values(req.body).includes("") || !req.files || !req.files.imagen) {
+      return res.status(400).json({ msg: "Todos los campos y la imagen son obligatorios" });
+    }
+
+    // Verificar si el email ya está registrado
     const verificarEmailBDD = await Usuario.findOne({ email });
     if (verificarEmailBDD) {
       return res.status(400).json({ msg: "El email ya se encuentra registrado, intente con uno diferente" });
     }
 
-    // Sube la imagen a Cloudinary
+    // Subir la imagen a Cloudinary
     const file = req.files.imagen;
     const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {
       folder: "usuarios",
@@ -33,7 +30,7 @@ const registro = async (req, res) => {
       unique_filename: true,
     });
 
-    // Crea un nuevo usuario con los datos proporcionados
+    // Crear el nuevo usuario
     const nuevopropietario = new Usuario({
       nombre,
       apellido,
@@ -44,69 +41,68 @@ const registro = async (req, res) => {
       imagenPublicId: cloudinaryResponse.public_id, // Public ID para eliminar
     });
 
-    // Encripta la contraseña
+    // Encriptar la contraseña
     nuevopropietario.password = await nuevopropietario.encrypPassword(password);
 
-    // Crea una nueva tienda asociada al usuario
-    const nuevaTienda = new Tienda({
-      Nombre: NombreTienda,
-      Direccion: DireccionTienda,
-      id_propietario: nuevopropietario._id, // Asocia la tienda al usuario recién creado
-    });
-
-    // Guarda la tienda y el usuario en la base de datos
-    await nuevaTienda.save();
-    await nuevopropietario.save();
-
-    // Envía el correo de confirmación
+    // Crear un token de confirmación y enviarlo
     const token = nuevopropietario.crearToken();
     await sendMailToUser2(email, token);
 
+    // Guardar el nuevo usuario en la base de datos
+    await nuevopropietario.save();
+
+    // Ahora, proceder a crear la tienda
+    const propietarioBDD = await Usuario.findOne({ email });
+
+    if (!propietarioBDD) {
+      return res.status(404).json({ msg: "Propietario no encontrado" });
+    }
+
+    // Verificar que todos los campos de la tienda estén completos
+    if (Object.values(req.body).includes("")) {
+      return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos de la tienda" });
+    }
+
+    // Verificar si el propietario ya posee una tienda
+    if (propietarioBDD.propietario) {
+      return res.status(400).json({ msg: "El propietario ya posee una tienda" });
+    }
+
+    // Crear la tienda
+    const nuevaTienda = new Tienda({
+      Nombre,
+      Direccion,
+      id_propietario: propietarioBDD._id,
+    });
+
+    // Después de guardar la tienda en la base de datos
+    await nuevaTienda.save();
+
+    // Enviar correo al administrador con los detalles de la tienda
+    sendMailToAdmin(email, nuevaTienda, token);
+
     // Responder al cliente
-    res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta y tu tienda será revisada" });
+    res.status(200).json({ msg: "Usuario registrado y tienda solicitada. Revisa tu correo electrónico para confirmar tu cuenta" });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "Error al registrar el usuario y la tienda" });
+    res.status(500).json({ msg: "Error al procesar la solicitud, por favor intente nuevamente más tarde." });
   }
 };
 
-  
 
 const confirmEmail = async (req,res)=>{
-  const { token } = req.params;
+    //: ACTIVIDAD 1
+    if(!(req.params.token)) return res.status(400).json({msg:"Lo sentimos, no se puede validar la cuenta"})
 
-  // Validación de token
-  if (!token) return res.status(400).json({ msg: "Token no proporcionado" });
+    const propietarioBDD = await Usuario.findOne({token:req.params.token})
+    if(!propietarioBDD?.token) return res.status(404).json({msg:"Algo ha ocurrido, parece que la cuenta ya ha sido confirmada"})
 
-  // Buscar usuario por token
-  const propietario = await Usuario.findOne({ token });
-  if (!propietario) return res.status(404).json({ msg: "Token inválido o usuario no encontrado" });
+    propietarioBDD.confirmEmail=true
+    await propietarioBDD.save()
 
-  // Verificar si el token es para email o tienda
-  if (!propietario.confirmEmail) {
-      // Confirmación de email
-      propietario.confirmEmail = true;
-      propietario.token = null;
-      await propietario.save();
-
-      return res.status(200).json({ msg: "Correo electrónico confirmado con éxito, ahora puede iniciar sesión." });
-  } else if (!propietario.propietario) {
-      // Confirmación de tienda
-      const tienda = await Tienda.findOne({ id_propietario: propietario._id });
-      if (!tienda) return res.status(404).json({ msg: "Tienda no encontrada" });
-
-      tienda.Verificado = true;
-      propietario.token = null;
-      propietario.propietario = true;
-
-      await tienda.save();
-      await propietario.save();
-
-      return res.status(200).json({ msg: "Negocio verificado, la tienda ha sido aprobada!" });
-  } else {
-      return res.status(400).json({ msg: "La cuenta ya ha sido completamente confirmada." });
-  }
-};
+    res.status(200).json({msg:"Felicidades su cuenta ha sido confirmada, puede iniciar sesion"}) 
+} // * BIEN
 const actualizarPerfil = async (req,res)=>{
     const {id} = req.params
     if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:'Lo sentimos, debe ser un id válido'});
@@ -211,11 +207,11 @@ const perfil = (req,res)=>{
 
 // ! ENDPOINTS TIENDA
 const confirmarTienda = async (req,res)=>{
-    const { tokentienda } = req.params;
+    const { token } = req.params;
     //: ACTIVIDAD 1
-    if(!tokentienda) return res.status(400).json({msg:"Lo sentimos, no se puede validar la tienda"})
+    if(!token) return res.status(400).json({msg:"Lo sentimos, no se puede validar la tienda"})
     //: ACTIVIDAD 2
-    const propietario = await Usuario.findOne({ tokentienda });
+    const propietario = await Usuario.findOne({ token });
     if(!propietario) return res.status(404).json({msg:"Token inválido o propietario no encontrado"})
     //: ACTIVIDAD 3
     if(propietario.propietario === true) return res.status(404).json({msg:"propietario ya posee una tienda"})
@@ -225,11 +221,11 @@ const confirmarTienda = async (req,res)=>{
     if(!tienda)return res.status(404).json({ msg: "Tienda no encontrada" });
    
     tienda.Verificado = true;
-    propietario.tokentienda = null;
+    propietario.token = null;
     propietario.propietario = true;
     
     await tienda.save();
-    await Usuario.save();
+    await propietario.save();
     res.status(200).json({msg:"Negocio verificado, la tienda ha sido aprovada!"}) 
 } // * BIEN
 const solicitarTienda = async (req, res) => {

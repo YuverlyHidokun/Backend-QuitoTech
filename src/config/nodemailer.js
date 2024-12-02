@@ -32,14 +32,20 @@ const sendMailToUser = (userMail, token) => {
     });
 };
 const sendMailToUser2 = (userMail, token) => {
-
     let mailOptions = {
         from: process.env.USER_MAILTRAP,
         to: userMail,
-        subject: "Verifica tu cuenta",
-        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/propietario/confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        subject: "Verificación de Registro de Usuario",
+        html: `
+            <p>Hola, gracias por registrarte en nuestra plataforma.</p>
+            <p>Para completar tu registro y activar tu cuenta, por favor haz clic en el siguiente enlace:</p>
+            <p><a href="http://localhost:3000/propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
+            <p>Si no realizaste este registro, por favor ignora este correo.</p>
+            <p>¡Estamos emocionados de tenerte con nosotros!</p>
+            <br>
+            <p>Saludos,<br>El equipo de soporte.</p>
+        `
     };
-
 
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -49,15 +55,25 @@ const sendMailToUser2 = (userMail, token) => {
         }
     });
 };
-const sendMailToAdmin = (userMail, tokentienda) => {
+
+const sendMailToAdmin = (userMail, tienda, token) => {
+    // Desestructuramos los datos de la tienda
+    const { Nombre, Direccion, email } = tienda;
 
     let mailOptions = {
         from: process.env.USER_MAILTRAP,
         to: process.env.USER_MAILTRAP,
         subject: `Tienda de ${userMail}`,
-        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmartienda/${encodeURIComponent(tokentienda)}">aquí</a> para verificar la tienda.</p>`
+        html: `
+            <p>Hola, se ha creado una nueva tienda. Aquí están los detalles:</p>
+            <ul>
+                <li><strong>Nombre de la tienda:</strong> ${Nombre}</li>
+                <li><strong>Dirección:</strong> ${Direccion}</li>
+                <li><strong>Email del propietario:</strong> ${userMail}</li>
+            </ul>
+            <p>Haz clic <a href="href="http://localhost:3000/propietario/>confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
+        `
     };
-
 
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -67,6 +83,7 @@ const sendMailToAdmin = (userMail, tokentienda) => {
         }
     });
 };
+
 const sendMailToRecoveryPassword = async (userMail, token) => {
     let info = await transporter.sendMail({
         from: 'Administradores de la Pagina',

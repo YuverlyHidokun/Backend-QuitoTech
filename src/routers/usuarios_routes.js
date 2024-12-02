@@ -47,7 +47,7 @@ router.get('/propietario/tienda/:id_propietario', obtenerTiendaDelpropietario);
 // ! Rutas tienda 
 // ! verificarAutenticacion post
 router.post('/propietario/solicitud/',solicitarTienda) //OK
-router.get('/confirmartienda/:tokentienda',confirmarTienda) //OK
+router.get('/confirmartienda/:token',confirmarTienda) //OK
 router.get('/listartiendas',listarTiendas) //OK
 router.get('/tienda/:id',obtenerTiendaConProductos) //OK
 router.get('/listartiendasopciones',listarTiendasproductos) // OK
