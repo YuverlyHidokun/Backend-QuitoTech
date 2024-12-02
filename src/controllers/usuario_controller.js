@@ -221,7 +221,7 @@ const confirmarTienda = async (req,res)=>{
     if(!tienda)return res.status(404).json({ msg: "Tienda no encontrada" });
    
     tienda.Verificado = true;
-    propietario.token = null;
+    // propietario.token = null; Para evitar confucion sobre verificacion con tienda
     propietario.propietario = true;
     
     await tienda.save();
