@@ -277,6 +277,75 @@ const sendMailToVerifyMovilUser = async (userMail, token) => {
     });
     console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
 }
+const sendMailToDeleteProduct = async (userMail, id) => {
+    let info = await transporter.sendMail({
+        from: 'Administradores de la Página',  // Correo de origen
+        to: userMail,  // Correo del destinatario
+        subject: "Suspensión de producto",  // Asunto del correo
+        html: `
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Suspensión de producto</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .card {
+                        width: 100%;
+                        max-width: 600px;
+                        margin: 30px auto;
+                        background-color: #fff;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        padding: 20px;
+                        text-align: center;
+                    }
+                    h2 {
+                        color: #333;
+                    }
+                    p {
+                        font-size: 16px;
+                        color: #555;
+                    }
+                    .btn {
+                        display: inline-block;
+                        margin-top: 20px;
+                        padding: 12px 25px;
+                        background-color: #dc3545;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                    }
+                    .btn:hover {
+                        background-color: #c82333;
+                    }
+                    .token {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #007bff;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>Suspensión de producto</h2>
+                    <p>Hemos visto que tu producto no cumple con las normas de nuestra página, por lo que lo hemos suspendido.</p>
+                    <p>Revisa y actualiza tu producto para que pueda ser nuevamente aprobado.</p>
+                    <a href="http://localhost:3000/${id}" class="btn">Ver producto</a>
+                </div>
+            </body>
+        </html>
+        `
+    });
+    console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
+}
 
 // send mail with defined transport object
 export default sendMailToUser
@@ -287,7 +356,8 @@ export {
     sendMailToRecoveryPassword,
     sendMailToRecoveryPasswordAd,
     sendMailToAdmin,
-    sendMailToVerifyMovilUser
+    sendMailToVerifyMovilUser,
+    sendMailToDeleteProduct
 }
 
 

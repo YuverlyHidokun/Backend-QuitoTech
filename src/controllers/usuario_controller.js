@@ -8,59 +8,68 @@ import { v2 as cloudinary } from 'cloudinary';
 
 
 const registro = async (req, res) => {
-    const { nombre, apellido, email, password, Numero } = req.body;
-  
-    // Verifica que todos los campos obligatorios estén presentes
-    if (Object.values(req.body).includes("") || !req.files || !req.files.imagen) {
-      return res.status(400).json({ msg: "Todos los campos y la imagen son obligatorios" });
+  const { nombre, apellido, email, password, Numero, NombreTienda, DireccionTienda } = req.body;
+
+  // Verifica que todos los campos obligatorios estén presentes
+  if (
+    Object.values(req.body).includes("") ||
+    !req.files || !req.files.imagen
+  ) {
+    return res.status(400).json({ msg: "Todos los campos, incluyendo la tienda, y la imagen son obligatorios" });
+  }
+
+  try {
+    // Verifica si el email ya está registrado
+    const verificarEmailBDD = await Usuario.findOne({ email });
+    if (verificarEmailBDD) {
+      return res.status(400).json({ msg: "El email ya se encuentra registrado, intente con uno diferente" });
     }
-  
-    try {
-      // Verifica si el email ya está registrado
-      const verificarEmailBDD = await Usuario.findOne({ email });
-      if (verificarEmailBDD) {
-        return res.status(400).json({ msg: "El email ya se encuentra registrado, intente con uno diferente" });
-      }
-  
-      // Obtén el archivo enviado
-      const file = req.files.imagen;
-  
-      // Sube la imagen a Cloudinary
-      const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {
-        folder: "usuarios",
-        use_filename: true,
-        unique_filename: true,
-      });
-  
-      // Crea un nuevo usuario con los datos proporcionados
-      const nuevopropietario = new Usuario({
-        nombre,
-        apellido,
-        email,
-        password,
-        Numero,
-        ImagenUrl: cloudinaryResponse.secure_url, // URL para mostrar la imagen
-        imagenPublicId: cloudinaryResponse.public_id, // Public ID para eliminar
-      });
-  
-      // Encripta la contraseña
-      nuevopropietario.password = await nuevopropietario.encrypPassword(password);
-  
-      // Crea un token de confirmación
-      const token = nuevopropietario.crearToken();
-  
-      // Envía el correo de confirmación
-      await sendMailToUser2(email, token);
-  
-      // Guarda el usuario en la base de datos
-      await nuevopropietario.save();
-  
-      res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: "Error al registrar el usuario" });
-    }
-  };
+
+    // Sube la imagen a Cloudinary
+    const file = req.files.imagen;
+    const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: "usuarios",
+      use_filename: true,
+      unique_filename: true,
+    });
+
+    // Crea un nuevo usuario con los datos proporcionados
+    const nuevopropietario = new Usuario({
+      nombre,
+      apellido,
+      email,
+      password,
+      Numero,
+      ImagenUrl: cloudinaryResponse.secure_url, // URL para mostrar la imagen
+      imagenPublicId: cloudinaryResponse.public_id, // Public ID para eliminar
+    });
+
+    // Encripta la contraseña
+    nuevopropietario.password = await nuevopropietario.encrypPassword(password);
+
+    // Crea una nueva tienda asociada al usuario
+    const nuevaTienda = new Tienda({
+      Nombre: NombreTienda,
+      Direccion: DireccionTienda,
+      id_propietario: nuevopropietario._id, // Asocia la tienda al usuario recién creado
+    });
+
+    // Guarda la tienda y el usuario en la base de datos
+    await nuevaTienda.save();
+    await nuevopropietario.save();
+
+    // Envía el correo de confirmación
+    const token = nuevopropietario.crearToken();
+    await sendMailToUser2(email, token);
+
+    // Responder al cliente
+    res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta y tu tienda será revisada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al registrar el usuario y la tienda" });
+  }
+};
+
   
 
 const confirmEmail = async (req,res)=>{

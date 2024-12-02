@@ -1,6 +1,6 @@
 import Administrador from "../models/administrador.js";
 import Moderador from "../models/moderador.js"; // Asegúrate de que tienes un modelo de Moderador si es necesario
-import { sendMailToUser, sendMailToRecoveryPasswordAd } from "../config/nodemailer.js";
+import { sendMailToUser, sendMailToRecoveryPasswordAd, sendMailToDeleteProduct} from "../config/nodemailer.js";
 import generarJWT from "../helpers/crearJWT.js";
 import mongoose from "mongoose";
 import Tienda from "../models/tienda.js";
@@ -287,14 +287,46 @@ const eliminarProducto = async (req, res) => {
   const { id } = req.params;  // Asegúrate de que el nombre del parámetro coincide con el de la ruta
 
   try {
+    // 1. Buscar el producto por su id
     const producto = await Producto.findById(id);
     if (!producto) return res.status(404).json({ msg: "Producto no encontrado" });
 
-    await producto.deleteOne();  // Utiliza deleteOne en lugar de remove
-    res.status(200).json({ msg: "Producto eliminado correctamente" });
+    // 2. Actualizar el estado del producto a false
+    producto.Estado = false;
+    // Guardamos los cambios en el producto
+    await producto.save();
+
+    // 3. Buscar el producto y poblar las referencias de id_tienda e id_propietario
+    const populatedProducto = await Producto.findById(id)
+      .populate({
+        path: 'id_tienda', // Poblar id_tienda
+        populate: {
+          path: 'id_propietario', // Poblar id_propietario dentro de id_tienda
+        }
+      });
+
+    // 4. Acceder a los datos del propietario
+    const propietario = populatedProducto.id_tienda.id_propietario;
+    if (!propietario) {
+      return res.status(404).json({ msg: "Propietario no encontrado" });
+    }
+
+    // 5. Obtener los datos del propietario, como el email
+    const userMail = propietario.email;
+    const userName = propietario.nombre;
+
+    // Mostrar los datos del propietario en la consola (puedes usar estos datos como necesites)
+    console.log('Email:', userMail);
+    console.log('Nombre:', userName);
+
+    // 6. Llamar a la función de enviar correo (comentado aquí)
+    // await sendMailToDeleteProduct(userMail); // Llama a esta función si es necesario
+    await sendMailToDeleteProduct(userMail, id)
+    // Responder con éxito
+    res.status(200).json({ msg: "Estado del producto actualizado correctamente y propietario notificado." });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "Hubo un error al eliminar el producto" });
+    res.status(500).json({ msg: "Hubo un error al actualizar el estado del producto" });
   }
 };
 
@@ -311,7 +343,7 @@ const listarUsuarios = async (req, res) => {
   }
 };
 
-const eliminarUsuario = async (req, res) => {
+/*const eliminarUsuario = async (req, res) => {
   try {
       const { id_usuario } = req.params;
       if (!id_usuario) {
@@ -330,7 +362,7 @@ const eliminarUsuario = async (req, res) => {
       res.status(500).json({ msg: 'Hubo un error al eliminar el usuario' });
   }
 };
-
+*/
 const listarModeradores = async (req, res) => {
   try {
     const moderadores = await Moderador.find()
@@ -362,7 +394,7 @@ const eliminarModerador = async (req, res) => {
   }
 };
 
-const crearUsuario = async (req, res) => {
+/*const crearUsuario = async (req, res) => {
   try {
     // Validar campos requeridos
     const requiredFields = ["nombre", "apellido", "email", "password"];
@@ -410,7 +442,7 @@ const crearUsuario = async (req, res) => {
     res.status(500).json({ msg: "Hubo un error al crear el usuario", error: error.message });
   }
 };
-
+*/
 const obtenerUsuariosPorMes = async (req, res) => {
   try {
     const usuariosPorMes = await usuario.aggregate([
@@ -559,10 +591,10 @@ export {
   confirmEmail,
   desactivarTienda,  // Agregado
   eliminarProducto, // Se mantiene la función de eliminar producto
-  eliminarUsuario,
+  //eliminarUsuario,
   listarModeradores,
   eliminarModerador,
-  crearUsuario,
+  //crearUsuario,
   obtenerUsuariosPorMes,
   listarEstadisticas,
   obtenerUltimos10Productos,

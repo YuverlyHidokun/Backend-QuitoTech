@@ -16,10 +16,10 @@ import {
   eliminarProducto,         // Nueva función para eliminar productos
   crearModerador,
   listarUsuarios,            // Nueva función para crear moderadores con permisos específicos
-  eliminarUsuario,
+  //eliminarUsuario,
   listarModeradores,
   eliminarModerador,
-  crearUsuario,
+  //crearUsuario,
   obtenerUsuariosPorMes,
   listarEstadisticas,
   obtenerUltimos10Productos,
@@ -30,18 +30,18 @@ import {
 const router = Router();
 
 // Rutas de registro y login
-router.post('/registro', registro);
-router.post('/login', login);
+router.post('/registro', registro); //OK
+router.get('/confirmar/:token', confirmEmail); //OK
+router.post('/login', login); //OK
 
 // Rutas de recuperación de contraseña
-router.get('/confirmar/:token', confirmEmail);
-router.post('/recuperar-password', recuperarPassword);
-router.get('/recuperar-password/:token', comprobarTokenPasword);
-router.post('/nuevo-password/:token', nuevoPassword);
+router.post('/recuperar-password', recuperarPassword); //ok
+router.get('/recuperar-password/:token', comprobarTokenPasword); //ok
+router.post('/nuevo-password/:token', nuevoPassword); //ok
 
 // Rutas de actualización de email y password
-router.put('/administrador/actualizaremail', actualizarEmail);
-router.put('/administrador/actualizarpassword', actualizarPassword);
+// ! router.put('/administrador/actualizaremail', actualizarEmail);
+// router.put('/administrador/actualizarpassword', actualizarPassword);
 
 // Rutas de productos y tiendas
 router.get('/administrador/listartiendas', listarTiendas);
@@ -59,9 +59,9 @@ router.get("/administrador/moderadores", listarModeradores);
 router.delete("/administrador/moderadores/:id", eliminarModerador);
 
 router.get("/administrador/listausuarios", listarUsuarios);
-router.delete('/administrador/usuario/:id_usuario', eliminarUsuario);
+// ! router.delete('/administrador/usuario/:id_usuario', eliminarUsuario);
 
-router.post("/administrador/crearusuarios", crearUsuario);
+// ! router.post("/administrador/crearusuarios", crearUsuario);
 
 router.get("/administrador/usuarios/por-mes", obtenerUsuariosPorMes);
 

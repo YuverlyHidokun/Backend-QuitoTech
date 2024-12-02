@@ -15,7 +15,7 @@ const TiendaSchema = new Schema({
     },
     id_propietario:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Propietario'
+        ref:'Usuario'
     }
     
 },{
