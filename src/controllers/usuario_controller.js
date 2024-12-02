@@ -192,6 +192,7 @@ const login = async(req,res)=>{
         direccion,
         telefono,
         _id,
+        ImagenUrl : propietarioBDD.ImagenUrl,
         email:propietarioBDD.email,
         propietario:propietarioBDD.propietario})
 } // * BIEN
