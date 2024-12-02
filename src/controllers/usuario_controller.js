@@ -151,7 +151,7 @@ const comprobarTokenPasword = async (req,res)=>{
     const propietarioBDD = await Usuario.findOne({token:req.params.token})
     if(propietarioBDD?.token !== req.params.token) return res.status(404).json({msg:"Lo sentimos, no se puede validar la cuenta"})
     await propietarioBDD.save()
-    res.status(200).json({msg:"Token confirmado, ya puedes crear tu nueva contraseña"}) 
+    res.status(200).json({msg:"Hemos verificado tu correo, porfavor rellena los campos para tu nueva contraseña"})
 }// * BIEN
 const nuevoPassword = async (req,res)=>{
     const{password,confirmpassword} = req.body
