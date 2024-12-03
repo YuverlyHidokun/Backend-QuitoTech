@@ -73,7 +73,7 @@ const sendMailToAdmin = (userMail, tienda, token) => {
                 <li><strong>Dirección:</strong> ${Direccion}</li>
                 <li><strong>Email del propietario:</strong> ${userMail}</li>
             </ul>
-            <p>Haz clic <a href="href="http://localhost:3000/propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
+            <p>Haz clic <a href="${process.env.URL_FRONTEND}propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
             <strong><p>----------------------------------------------------------------------------------------------------</p></strong>
             <p style="color: grey;">Este es un correo electrónico generado por el sistema. No responda a este correo electrónico.</p>
         `
