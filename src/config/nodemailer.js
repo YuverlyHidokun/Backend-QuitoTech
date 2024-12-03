@@ -19,7 +19,7 @@ const sendMailToUserUpdateEmail = (email, token) => {
         from: process.env.USER_MAILTRAP,
         to: email,
         subject: "Actualizacion de cuenta",
-        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}propietario/actualizar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/propietario/actualizar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
 
 
@@ -39,7 +39,7 @@ const sendMailToUser2 = (userMail, token) => {
         html: `
             <p>Hola, gracias por registrarte en nuestra plataforma.</p>
             <p>Para completar tu registro y activar tu cuenta, por favor haz clic en el siguiente enlace:</p>
-            <p><a href="${process.env.VITE_FRONTEND_URL}propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
+            <p><a href="${process.env.VITE_FRONTEND_URL}/propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
             <p>Si no realizaste este registro, por favor ignora este correo.</p>
             <p>¡Estamos emocionados de tenerte con nosotros!</p>
             <br>
