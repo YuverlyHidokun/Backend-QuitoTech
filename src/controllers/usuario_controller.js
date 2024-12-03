@@ -255,15 +255,37 @@ const login = async(req,res)=>{
         email:propietarioBDD.email,
         propietario:propietarioBDD.propietario})
 } // * BIEN
-const perfil = (req,res)=>{
-    delete req.propietarioBDD.token
-    delete req.propietarioBDD.tokentienda
-    delete req.propietarioBDD.confirmEmail
-    delete req.propietarioBDD.createdAt
-    delete req.propietarioBDD.updatedAt
-    delete req.propietarioBDD.__v
-    res.status(200).json(req.propietarioBDD)
-} // * BIEN
+const perfil = async (req, res) => {
+  const { id } = req.params;
+
+  // Verificar si el usuario existe
+  const VerificarUsuario = await Usuario.findById(id);
+  if (!VerificarUsuario) {
+    return res.status(404).json({ msg: "No encontramos su perfil, por favor intente más tarde." });
+  }
+
+  // Verificar si la tienda existe asociada al usuario
+  const VerificarTienda = await Tienda.findOne({ id_propietario: id });
+  if (!VerificarTienda) {
+    return res.status(404).json({ msg: "No encontramos su tienda, por favor intente más tarde." });
+  }
+
+  // Devolver los datos del usuario y la tienda
+  return res.status(200).json({
+    usuario: {
+      nombre: VerificarUsuario.nombre,
+      apellido: VerificarUsuario.apellido,
+      email: VerificarUsuario.email,
+      numero: VerificarUsuario.Numero,
+      imagenUrl: VerificarUsuario.ImagenUrl,
+    },
+    tienda: {
+      nombre: VerificarTienda.Nombre,
+      direccion: VerificarTienda.Direccion,
+      id_propietario: VerificarTienda.id_propietario,
+    },
+  });
+};
 
 // ! ENDPOINTS TIENDA
 const confirmarTienda = async (req,res)=>{
