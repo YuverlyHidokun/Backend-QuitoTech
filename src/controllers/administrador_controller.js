@@ -5,7 +5,7 @@ import generarJWT from "../helpers/crearJWT.js";
 import mongoose from "mongoose";
 import Tienda from "../models/tienda.js";
 import Producto from "../models/producto.js";
-import Usuario from "../models/usuarios.js";
+import usuario from "../models/usuarios.js";
 
 const login = async (req, res) => {
   const { email, password } = req.body;
