@@ -158,6 +158,17 @@ const listarproductosporCategoria = async (req, res) => {
       console.log(error);
   }
 };//BIEN
+const obtenerTodosProductos = async (req, res) => {
+  try {
+    // Filtrar solo los productos con Estado en true y popular los datos de la tienda
+    const productos = await Producto.find().populate('id_tienda');
+
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error al obtener los productos', error });
+ }
+};//BIEN
 // Exportaciones
 export {
     detalleProducto,
@@ -168,4 +179,5 @@ export {
     obtenerProductos,
     ProductosInactivos,
     listarproductosporCategoria,
+    obtenerTodosProductos
 };
