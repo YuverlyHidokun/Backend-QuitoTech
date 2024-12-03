@@ -1,6 +1,6 @@
 import Administrador from "../models/administrador.js";
 import Moderador from "../models/moderador.js"; // Asegúrate de que tienes un modelo de Moderador si es necesario
-import { sendMailToUser, sendMailToRecoveryPasswordAd, sendMailToDeleteProduct} from "../config/nodemailer.js";
+import { sendMailToUser2, sendMailToRecoveryPasswordAd, sendMailToDeleteProduct} from "../config/nodemailer.js";
 import generarJWT from "../helpers/crearJWT.js";
 import mongoose from "mongoose";
 import Tienda from "../models/tienda.js";
@@ -81,7 +81,7 @@ const registro = async (req, res) => {
   await nuevoAdministrador.save();
 
   const token = nuevoAdministrador.crearToken();
-  await sendMailToUser(email, token);
+  await sendMailToUser2(email, token);
   await nuevoAdministrador.save();
   res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 };
