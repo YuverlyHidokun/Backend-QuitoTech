@@ -25,7 +25,6 @@ import {
     listarTiendasproductos,
     obtenerTiendaDelpropietario,
     obtenerTiendaConProductos,
-    obtenerTodosProductos
 } from "../controllers/usuario_controller.js";
 
 const router =Router()
@@ -45,7 +44,6 @@ router.put('/propietario/actualizaremail',actualizarEmail) //OK
 router.put('/propietario/actualizarpassword',actualizarPassword) //OK
 router.put('/propietario/:id',actualizarPerfil) //OK
 router.get('/propietario/tienda/:id_propietario', obtenerTiendaDelpropietario);
-router.get('/productos', obtenerTodosProductos);
 
 // ! Rutas tienda 
 // ! verificarAutenticacion post

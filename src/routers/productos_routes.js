@@ -8,7 +8,8 @@ import {
     cambiarEstado,
     obtenerProductos,
     ProductosInactivos,
-    listarproductosporCategoria
+    listarproductosporCategoria,
+    obtenerTodosProductos
 } from "../controllers/productos_controller.js";
 import verificarAutenticacion from "../middlewares/autenticacion.js";
 
@@ -24,5 +25,6 @@ router.get('/productos/sinstock', ProductosInactivos);
 router.put('/producto/:id',actualizarProducto);
 router.put('/producto/estado/:id',cambiarEstado);
 router.delete('/producto/:id',eliminarProducto);
+router.get('/productos', obtenerTodosProductos);
 
 export default router;
