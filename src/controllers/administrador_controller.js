@@ -574,6 +574,43 @@ const obtenerModerador = async (req, res) => {
   }
 };
 
+const obtenerProductosPorMes = async (req, res) => {
+  const { id_tienda } = req.params; // Obtener el id_tienda desde los parámetros de la URL
+
+  try {
+    const productosPorMes = await Producto.aggregate([
+      {
+        $match: { id_tienda: id_tienda } // Filtra los productos por el id de la tienda
+      },
+      {
+        $group: {
+          _id: {
+            año: { $year: "$createdAt" }, // Agrupa por año
+            mes: { $month: "$createdAt" }  // Agrupa por mes
+          },
+          total: { $sum: 1 } // Cuenta el número de productos registrados por mes
+        }
+      },
+      {
+        $sort: { "_id.año": 1, "_id.mes": 1 } // Ordena los resultados por año y mes
+      },
+      {
+        $project: {
+          _id: 0, // No devolvemos el _id
+          año: "$_id.año",
+          mes: "$_id.mes", // Devuelve el número del mes
+          total: 1 // Devuelve el total de productos registrados
+        }
+      }
+    ]);
+
+    res.status(200).json(productosPorMes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Hubo un error al obtener los productos por mes", error: error.message });
+  }
+};
+
 export {
   login,
   registro,
@@ -599,6 +636,7 @@ export {
   listarEstadisticas,
   obtenerUltimos10Productos,
   obtenerTiendaPorId,
-  obtenerModerador
+  obtenerModerador,
+  obtenerProductosPorMes
 };
 
