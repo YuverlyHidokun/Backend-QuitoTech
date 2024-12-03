@@ -15,6 +15,7 @@ import {
 	recuperarPassword,
     comprobarTokenPasword,
 	nuevoPassword,
+    updateEmail,
 
     // ! Rutas de tienda
 
@@ -33,6 +34,7 @@ const router =Router()
 router.post('/propietario/login',login) //OK
 router.post('/propietario/registro',registro) //OK
 router.get('/propietario/confirmar/:token',confirmEmail) //OK
+router.get('/propietario/actualizar/:token',updateEmail) //OK
 router.post('/propietario/recuperar-password',recuperarPassword) //OK
 router.get('/propietario/recuperar-password/:token',comprobarTokenPasword) //OK
 router.post('/propietario/nuevo-password/:token',nuevoPassword) //OK

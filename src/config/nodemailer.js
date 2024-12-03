@@ -13,13 +13,13 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-const sendMailToUser = (userMail, token) => {
+const sendMailToUserUpdateEmail = (email, token) => {
 
     let mailOptions = {
         from: process.env.USER_MAILTRAP,
-        to: userMail,
-        subject: "Verifica tu cuenta",
-        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        to: email,
+        subject: "Actualizacion de cuenta",
+        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}propietario/actualizar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
 
 
@@ -39,7 +39,7 @@ const sendMailToUser2 = (userMail, token) => {
         html: `
             <p>Hola, gracias por registrarte en nuestra plataforma.</p>
             <p>Para completar tu registro y activar tu cuenta, por favor haz clic en el siguiente enlace:</p>
-            <p><a href="${process.env.VITE_FRONTEND_URL}/propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
+            <p><a href="${process.env.URL_FRONTEND}propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
             <p>Si no realizaste este registro, por favor ignora este correo.</p>
             <p>¡Estamos emocionados de tenerte con nosotros!</p>
             <br>
@@ -58,7 +58,6 @@ const sendMailToUser2 = (userMail, token) => {
     });
 };
 
-
 const sendMailToAdmin = (userMail, tienda, token) => {
     // Desestructuramos los datos de la tienda
     const { Nombre, Direccion, email } = tienda;
@@ -74,7 +73,7 @@ const sendMailToAdmin = (userMail, tienda, token) => {
                 <li><strong>Dirección:</strong> ${Direccion}</li>
                 <li><strong>Email del propietario:</strong> ${userMail}</li>
             </ul>
-            <p>Haz clic <a href="${process.env.VITE_FRONTEND_URL}/propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
+            <p>Haz clic <a href="href="http://localhost:3000/propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
             <strong><p>----------------------------------------------------------------------------------------------------</p></strong>
             <p style="color: grey;">Este es un correo electrónico generado por el sistema. No responda a este correo electrónico.</p>
         `
@@ -88,7 +87,6 @@ const sendMailToAdmin = (userMail, tienda, token) => {
         }
     });
 };
-
 
 const sendMailToRecoveryPassword = async (userMail, token) => {
     let info = await transporter.sendMail({
@@ -151,7 +149,7 @@ const sendMailToRecoveryPassword = async (userMail, token) => {
         <div class="container">
             <h1>Sistema de Gestión de Tiendas (Tiendas Quito 🛒 🏬)</h1>
             <hr>
-            <a href="${process.env.URL_FRONTEND}usuario/recuperar-password/${token}">Clic para reestablecer tu contraseña</a>
+            <a href="${process.env.URL_FRONTEND}propietario/recuperar-password/${token}">Clic para reestablecer tu contraseña</a>
             <hr>
             <footer><b>¡TeamKhaos te da la Bienvenida!</b></footer>
         </div>
@@ -371,10 +369,10 @@ const sendMailToDeleteProduct = async (userMail, id) => {
 }
 
 // send mail with defined transport object
-export default sendMailToUser
+export default sendMailToUser2
 
 export {
-    sendMailToUser,
+    sendMailToUserUpdateEmail,
     sendMailToUser2,
     sendMailToRecoveryPassword,
     sendMailToRecoveryPasswordAd,
