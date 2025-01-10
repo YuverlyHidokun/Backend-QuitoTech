@@ -190,8 +190,17 @@ const crearModerador = async (req, res) => {
 
 // * Rutas relacionadas con Tiendas y Productos
 const listarTiendas = async (req, res) => {
-  const tiendas = await Tienda.find({ Verificado: true }).where('Tienda').equals(req.TiendaBDD).select("-salida -createdAt -updatedAt -__v").populate('Nombre_tienda Direccion');
-  res.status(200).json(tiendas);
+  try {
+    const tiendas = await Tienda.find({ Verificado: true })
+      .where('Tienda').equals(req.TiendaBDD)
+      .select("-salida -createdAt -updatedAt -__v")
+      .populate('Nombre Direccion'); // Usamos el nombre correcto del campo
+
+    res.status(200).json(tiendas);
+  } catch (error) {
+    console.error("Error al listar tiendas:", error);
+    res.status(500).json({ msg: "Ocurrió un error al listar las tiendas. Intente más tarde." });
+  }
 };
 
 // Controlador - administrador_controller.js
@@ -206,7 +215,7 @@ const listarproductosIDtienda = async (req, res) => {
     const productos = await Producto.find({ id_tienda })
       .select("-salida -createdAt -updatedAt -__v")
       .populate('id_tienda', 'Nombre_tienda')
-      .populate('Nombre_producto Categoria');
+      .populate('Nombre Categoria');
 
     res.status(200).json(productos);
   } catch (error) {
@@ -532,7 +541,7 @@ const obtenerTiendaPorId = async (req, res) => {
 
   try {
     // Buscar la tienda en la base de datos usando el ID proporcionado
-    const tienda = await Tienda.findById(id).populate('id_usuario', 'nombre apellido'); // Populate para obtener datos del usuario (si es necesario)
+    const tienda = await Tienda.findById(id).populate('id_propietario', 'nombre apellido'); // Populate para obtener datos del usuario (si es necesario)
     
     // Verificar si la tienda existe
     if (!tienda) {
