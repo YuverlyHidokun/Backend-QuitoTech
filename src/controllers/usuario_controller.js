@@ -114,10 +114,6 @@ const actualizarPerfil = async (req, res) => {
   const TiendaBDD = await Tienda.findOne({ id_usuario: id });
   if (!TiendaBDD) return res.status(404).json({ msg: "Lo sentimos, la tienda no se encuentra registrada" });
 
-  if (!TiendaBDD.Verificado) {
-    return res.status(404).json({ msg: "Aún no se verifica la información de su tienda" });
-  }
-
   const propietarioBDD = await Usuario.findById(id);
   if (!propietarioBDD) return res.status(404).json({ msg: `Lo sentimos, el propietario ${id} no existe!` });
 

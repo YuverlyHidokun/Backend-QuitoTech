@@ -4,54 +4,67 @@ import { sendMailToVerifyMovilUser } from "../config/nodemailer.js";
 
 
 const registro = async (req, res) => {
-    const { nombre, email, password, acepta_terminos } = req.body;
-    
-    // Verificar si acepta los términos
-    if (acepta_terminos === "false") return res.status(400).json({ msg: "Para continuar debe aceptar nuestros terminos y condiciones" });
+    try {
+        const { nombre, email, password, acepta_terminos } = req.body;
 
-    // Verificar que todos los campos estén completos
-    if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+        // Validar que todos los campos estén presentes
+        
 
-    // Verificar si el email ya existe
-    const verificarEmailBDD = await UsuarioMovil.findOne({ email });
-    if (verificarEmailBDD) return res.status(400).json({ msg: "El email ya se encuentra registrado, intente con uno diferente" });
-
-    // Generar token de 5 caracteres (números y letras aleatorias)
-    const generarToken = () => {
-        const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let token = '';
-        for (let i = 0; i < 5; i++) {
-            token += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        // Verificar si acepta los términos
+        if (acepta_terminos === "false") {
+            return res.status(400).json({ msg: "Debe aceptar nuestros términos y condiciones" });
         }
-        return token;
-    };
 
-    const token = generarToken();  // Crear token de 5 caracteres
+        // Verificar si el email ya está registrado
+        const verificarEmailBDD = await UsuarioMovil.findOne({ email });
+        if (verificarEmailBDD) {
+            return res.status(400).json({ msg: "El email ya se encuentra registrado, intente con uno diferente" });
+        }
 
-    // Crear un nuevo usuario y asignar el token
-    const nuevoUsuario = new UsuarioMovil({
-        nombre,
-        email,
-        password,
-        acepta_terminos,
-        token  // Asignar el token al objeto usuario
-    });
+        // Generar token único de 5 caracteres
+        const generarToken = () => {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let token = '';
+            for (let i = 0; i < 5; i++) {
+                token += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            return token;
+        };
 
-    // Encriptar la contraseña antes de guardarla
-    nuevoUsuario.password = await nuevoUsuario.encrypPassword(password);
+        const token = generarToken();
 
-    // Guardar el usuario en la base de datos
-    await nuevoUsuario.save();
+        // Crear un nuevo usuario
+        const nuevoUsuario = new UsuarioMovil({
+            nombre,
+            email,
+            password,
+            acepta_terminos,
+            token
+        });
 
-    // Enviar el correo de verificación (si es necesario)
-    await sendMailToVerifyMovilUser(email, token);  // Llamar a la función de envío de correo
+        // Encriptar la contraseña
+        if (!password) {
+            return res.status(400).json({ msg: "La contraseña es obligatoria" });
+        }
+        nuevoUsuario.password = await nuevoUsuario.encrypPassword(password);
 
-    res.status(200).json({
-        msg: "Tu cuenta fue creada exitosamente. Revisa tu correo para confirmar tu cuenta.",
-        id_usuario: nuevoUsuario._id,
-        token: nuevoUsuario.token
-    });
+        // Guardar el usuario en la base de datos
+        await nuevoUsuario.save();
+
+        // Enviar el correo de verificación
+        await sendMailToVerifyMovilUser(email, token);
+
+        res.status(200).json({
+            msg: "Tu cuenta fue creada exitosamente. Revisa tu correo para confirmar tu cuenta.",
+            id_usuario: nuevoUsuario._id,
+            token: nuevoUsuario.token
+        });
+    } catch (error) {
+        console.error("Error en el registro de usuario:", error);
+        res.status(500).json({ msg: "Error interno del servidor" });
+    }
 };
+
 const verificarCuenta = async (req, res) => {
     const { id_usuario, token } = req.body;
 
