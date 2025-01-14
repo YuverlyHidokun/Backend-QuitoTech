@@ -22,10 +22,10 @@ import {
   //crearUsuario,
   obtenerUsuariosPorMes,
   listarEstadisticas,
+  listarEstadisticasMod,
   obtenerUltimos10Productos,
   obtenerTiendaPorId,
-  obtenerModerador,
-  obtenerProductosPorMes
+  obtenerModerador
 } from "../controllers/administrador_controller.js";
 
 const router = Router();
@@ -49,7 +49,6 @@ router.get('/administrador/listartiendas', listarTiendas);
 router.get('/administrador/producto/listarproductos/:id', listarproductosporID);
 router.get('/administrador/productos/categoria/:Categoria', listarproductosporCategoria);
 router.get('/administrador/tienda/productos/:id_tienda', listarproductosIDtienda);
-router.get('/productos/por-mes/:id_tienda', obtenerProductosPorMes);
 
 // Rutas para eliminar tiendas y productos
 router.put('/administrador/tienda/:id_tienda/desactivar', desactivarTienda); //desactivar tienda
@@ -67,7 +66,8 @@ router.get("/administrador/listausuarios", listarUsuarios);
 
 router.get("/administrador/usuarios/por-mes", obtenerUsuariosPorMes);
 
-router.get('/administrador/estadisticas', listarEstadisticas);
+router.get('/administrador/estadisticas', listarEstadisticasMod);
+router.get('/administrador/estadisticas/:id_tienda', listarEstadisticas);
 
 router.get('/administrador/ultimos-productos', obtenerUltimos10Productos);
 

@@ -19,7 +19,7 @@ const sendMailToUserUpdateEmail = (email, token) => {
         from: process.env.USER_MAILTRAP,
         to: email,
         subject: "Actualizacion de cuenta",
-        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/propietario/actualizar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        html: `<p>Hola, haz clic <a href="${process.env.URL_FRONTEND}propietario/actualizar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
 
 
@@ -39,7 +39,7 @@ const sendMailToUser2 = (userMail, token) => {
         html: `
             <p>Hola, gracias por registrarte en nuestra plataforma.</p>
             <p>Para completar tu registro y activar tu cuenta, por favor haz clic en el siguiente enlace:</p>
-            <p><a href="${process.env.VITE_FRONTEND_URL}/propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
+            <p><a href="${process.env.URL_FRONTEND}propietario/confirmar/${encodeURIComponent(token)}" style="color: #4CAF50; font-weight: bold;">Verificar mi cuenta</a></p>
             <p>Si no realizaste este registro, por favor ignora este correo.</p>
             <p>¡Estamos emocionados de tenerte con nosotros!</p>
             <br>
@@ -65,7 +65,7 @@ const sendMailToAdmin = (userMail, tienda, token) => {
     let mailOptions = {
         from: process.env.USER_MAILTRAP,
         to: process.env.USER_MAILTRAP,
-        subject: `Tienda de ${userMail}`, // Corregido el uso de las comillas invertidas
+        subject: `Tienda de ${userMail}`,
         html: `
             <p>Hola, se ha creado una nueva tienda. Aquí están los detalles:</p>
             <ul>
@@ -73,7 +73,7 @@ const sendMailToAdmin = (userMail, tienda, token) => {
                 <li><strong>Dirección:</strong> ${Direccion}</li>
                 <li><strong>Email del propietario:</strong> ${userMail}</li>
             </ul>
-            <p>Haz clic <a href="${process.env.VITE_FRONTEND_URL}/propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
+            <p>Haz clic <a href="${process.env.URL_FRONTEND}/propietario/confirmartienda/${encodeURIComponent(token)}">aquí</a> para verificar la tienda.</p>
             <strong><p>----------------------------------------------------------------------------------------------------</p></strong>
             <p style="color: grey;">Este es un correo electrónico generado por el sistema. No responda a este correo electrónico.</p>
         `
@@ -87,7 +87,6 @@ const sendMailToAdmin = (userMail, tienda, token) => {
         }
     });
 };
-
 
 const sendMailToRecoveryPassword = async (userMail, token) => {
     let info = await transporter.sendMail({

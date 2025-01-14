@@ -12,6 +12,7 @@ import {
     actualizarPerfil,
     actualizarEmail,
     actualizarPassword,
+    verificarEmail,
 	recuperarPassword,
     comprobarTokenPasword,
 	nuevoPassword,
@@ -24,7 +25,7 @@ import {
     listarTiendas,
     listarTiendasproductos,
     obtenerTiendaDelpropietario,
-    obtenerTiendaConProductos,
+    obtenerTiendaConProductos
 } from "../controllers/usuario_controller.js";
 
 const router =Router()
@@ -34,20 +35,22 @@ const router =Router()
 router.post('/propietario/login',login) //OK
 router.post('/propietario/registro',registro) //OK
 router.get('/propietario/confirmar/:token',confirmEmail) //OK
-router.get('/propietario/actualizar/:token',updateEmail) //OK
+router.get('/propietario/actualizar/:token',updateEmail) //OK
+router.post('/propietario/verificar/:email', verificarEmail);
 router.post('/propietario/recuperar-password',recuperarPassword) //OK
 router.get('/propietario/recuperar-password/:token',comprobarTokenPasword) //OK
 router.post('/propietario/nuevo-password/:token',nuevoPassword) //OK
 // ! verificarAutenticacion
-router.get('/propietario/perfil/:id',perfil) //OK
+router.get('/propietario/perfil/:id',perfil) //OK
 router.put('/propietario/actualizaremail',actualizarEmail) //OK
 router.put('/propietario/actualizarpassword',actualizarPassword) //OK
-router.put('/propietario/:id',actualizarPerfil) //OK
+router.put('/propietario/:id',actualizarPerfil) //OK
 router.get('/propietario/tienda/:id_propietario', obtenerTiendaDelpropietario);
+
 
 // ! Rutas tienda 
 // ! verificarAutenticacion post
-router.post('/propietario/solicitud',solicitarTienda) //OK
+router.post('/propietario/solicitud/',solicitarTienda) //OK
 router.get('/confirmartienda/:token',confirmarTienda) //OK
 router.get('/listartiendas',listarTiendas) //OK
 router.get('/tienda/:id',obtenerTiendaConProductos) //OK

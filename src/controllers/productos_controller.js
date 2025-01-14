@@ -2,13 +2,16 @@ import mongoose from "mongoose";
 import Producto from "../models/producto.js";
 import Tienda from "../models/tienda.js";
 import { v2 as cloudinary } from 'cloudinary';
+import Reserva from "../models/reservas.js";
+import Comentario from "../models/comentarios.js";
+import Favorito from "../models/favoritos.js";
 
 const detalleProducto = async (req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).json({ msg: `Lo sentimos, no existe ese producto` });
-    
-    const producto = await Producto.findById(id).populate('id_tienda'); // Corrige 'Nombre_producto' a 'id_tienda'
-    res.status(200).json(producto);
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).json({ msg: `Lo sentimos, no existe ese producto` });
+
+  const producto = await Producto.findById(id).populate('id_tienda'); // Corrige 'Nombre_producto' a 'id_tienda'
+  res.status(200).json(producto);
 };
 const registrarProducto = async (req, res) => {
   const { id_tienda, Nombre, Categoria, Cantidad, imagenUrl, precio } = req.body;
@@ -27,7 +30,7 @@ const registrarProducto = async (req, res) => {
       use_filename: true,
       unique_filename: true,
     });
-    
+
     const producto = await Producto.create({
       Nombre,
       Categoria,
@@ -86,7 +89,6 @@ const actualizarProducto = async (req, res) => {
     res.status(500).json({ msg: "Error al actualizar el producto" });
   }
 };
-
 const eliminarProducto = async (req, res) => {
   const { id } = req.params;
   if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
@@ -117,22 +119,32 @@ const eliminarProducto = async (req, res) => {
 
   res.status(200).json({ msg: "Producto eliminado exitosamente" });
 };
-
 const cambiarEstado = async (req, res) => {
-    try {
-        const producto = await Producto.findById(req.params.id);
+  try {
+    const producto = await Producto.findById(req.params.id);
 
-        if (!producto) {
-            return res.status(404).json({ msg: 'Producto no encontrado' });
-        }
-        producto.Estado = !producto.Estado;
-        await producto.save();
-
-        res.json({ msg: 'El estado del producto se ha modificado', Estado: producto.Estado });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'Error en el servidor' });
+    if (!producto) {
+      return res.status(404).json({ msg: 'Producto no encontrado' });
     }
+    producto.Estado = !producto.Estado;
+    await producto.save();
+
+    res.json({ msg: 'El estado del producto se ha modificado', Estado: producto.Estado });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+};
+const obtenerTodosProductos = async (req, res) => {
+  try {
+    // Filtrar solo los productos con Estado en true y popular los datos de la tienda
+    const productos = await Producto.find().populate('id_tienda');
+
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error al obtener los productos', error });
+  }
 };
 const obtenerProductos = async (req, res) => {
   try {
@@ -158,43 +170,32 @@ const ProductosInactivos = async (req, res) => {
 };
 const listarproductosporCategoria = async (req, res) => {
   try {
-      const { Categoria } = req.params;
-      console.log(`Categoría recibida: ${Categoria}`);
+    const { Categoria } = req.params;
+    console.log(`Categoría recibida: ${Categoria}`);
 
-     const categoriasValidas = ['Mandos', 'Consolas', 'Videojuegos', 'Perifericos', 'ComponentesPC', 'Otros'];
+    const categoriasValidas = ['Mandos', 'Consolas', 'Videojuegos', 'Perifericos', 'ComponentesPC', 'Otros'];
 
-      if (!categoriasValidas.includes(Categoria)) {
-          return res.status(400).json({ msg: `La categoría '${Categoria}' no existe, busque en una categoria existente!` });
-      }
+    if (!categoriasValidas.includes(Categoria)) {
+      return res.status(400).json({ msg: `La categoría '${Categoria}' no existe, busque en una categoria existente!` });
+    }
 
-      const productos = await Producto.find({ Categoria, Estado:true });
-      res.status(200).json({ productos });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: "Hubo un error en el servidor" });
-      console.log(error);
-  }
-};//BIEN
-const obtenerTodosProductos = async (req, res) => {
-  try {
-    // Filtrar solo los productos con Estado en true y popular los datos de la tienda
-    const productos = await Producto.find().populate('id_tienda');
-
-    res.status(200).json(productos);
+    const productos = await Producto.find({ Categoria, Estado: true });
+    res.status(200).json({ productos });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: 'Error al obtener los productos', error });
- }
+    res.status(500).json({ msg: "Hubo un error en el servidor" });
+    console.log(error);
+  }
 };//BIEN
 // Exportaciones
 export {
-    detalleProducto,
-    registrarProducto,
-    actualizarProducto,
-    eliminarProducto,
-    cambiarEstado,
-    obtenerProductos,
-    ProductosInactivos,
-    listarproductosporCategoria,
-    obtenerTodosProductos
+  detalleProducto,
+  registrarProducto,
+  actualizarProducto,
+  eliminarProducto,
+  cambiarEstado,
+  obtenerProductos,
+  obtenerTodosProductos,
+  ProductosInactivos,
+  listarproductosporCategoria,
 };
