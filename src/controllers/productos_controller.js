@@ -86,21 +86,38 @@ const actualizarProducto = async (req, res) => {
     res.status(500).json({ msg: "Error al actualizar el producto" });
   }
 };
+
 const eliminarProducto = async (req, res) => {
-    const { id } = req.params;
-    if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).json({ msg: `Lo sentimos, no existe este producto` });
+  const { id } = req.params;
+  if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).json({ msg: `Lo sentimos, no existe este producto` });
 
-    const producto = await Producto.findById(id);
-    // Elimina la imagen de Cloudinary
-    if (producto.imagenPublicId) {
-      await cloudinary.uploader.destroy(producto.imagenPublicId);
-    }
+  const productoenreservas = await Reserva.findOne({ id_producto: id });
+  const productoenfavorito = await Favorito.findOne({ id_producto: id });
+  const productoencomentarios = await Comentario.findOne({ id_producto: id });
+  // Si el producto está en alguna de esas colecciones, eliminamos los registros correspondientes
+  if (productoenreservas) {
+    await Reserva.deleteMany({ id_producto: id });
+  }
 
-    await Producto.findByIdAndDelete(req.params.id);
+  if (productoenfavorito) {
+    await Favorito.deleteMany({ id_producto: id });
+  }
 
-    res.status(200).json({ msg: "Producto eliminado exitosamente" });
+  if (productoencomentarios) {
+    await Comentario.deleteMany({ id_producto: id });
+  }
+  const producto = await Producto.findById(id);
+  // Elimina la imagen de Cloudinary
+  if (producto.imagenPublicId) {
+    await cloudinary.uploader.destroy(producto.imagenPublicId);
+  }
+
+  await Producto.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({ msg: "Producto eliminado exitosamente" });
 };
+
 const cambiarEstado = async (req, res) => {
     try {
         const producto = await Producto.findById(req.params.id);

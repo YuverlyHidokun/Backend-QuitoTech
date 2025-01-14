@@ -90,6 +90,21 @@ const registro = async (req, res) => {
   }
 };
 
+const verificarEmail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const usuario = await Usuario.findOne({ email });
+    if (usuario) {
+      return res.status(200).json({ disponible: false });
+    }
+    res.status(200).json({ disponible: true });
+  } catch (error) {
+    console.error("Error verificando el email:", error);
+    res.status(500).json({ msg: "Error interno del servidor" });
+  }
+};
+
 
 const confirmEmail = async (req,res)=>{
     //: ACTIVIDAD 1
