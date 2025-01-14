@@ -5,7 +5,7 @@ import generarJWT from "../helpers/crearJWT.js";
 import mongoose from "mongoose";
 import Tienda from "../models/tienda.js";
 import Producto from "../models/producto.js";
-import usuario from "../models/usuarios.js";
+import Usuario from "../models/usuarios.js";
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -190,17 +190,8 @@ const crearModerador = async (req, res) => {
 
 // * Rutas relacionadas con Tiendas y Productos
 const listarTiendas = async (req, res) => {
-  try {
-    const tiendas = await Tienda.find({ Verificado: true })
-      .where('Tienda').equals(req.TiendaBDD)
-      .select("-salida -createdAt -updatedAt -__v")
-      .populate('Nombre Direccion'); // Usamos el nombre correcto del campo
-
-    res.status(200).json(tiendas);
-  } catch (error) {
-    console.error("Error al listar tiendas:", error);
-    res.status(500).json({ msg: "Ocurrió un error al listar las tiendas. Intente más tarde." });
-  }
+  const tiendas = await Tienda.find({ Verificado: true }).where('Tienda').equals(req.TiendaBDD).select("-salida -createdAt -updatedAt -__v").populate('Nombre_tienda Direccion');
+  res.status(200).json(tiendas);
 };
 
 // Controlador - administrador_controller.js
@@ -215,7 +206,7 @@ const listarproductosIDtienda = async (req, res) => {
     const productos = await Producto.find({ id_tienda })
       .select("-salida -createdAt -updatedAt -__v")
       .populate('id_tienda', 'Nombre_tienda')
-      .populate('Nombre Categoria');
+      .populate('Nombre_producto Categoria');
 
     res.status(200).json(productos);
   } catch (error) {
@@ -352,26 +343,6 @@ const listarUsuarios = async (req, res) => {
   }
 };
 
-/*const eliminarUsuario = async (req, res) => {
-  try {
-      const { id_usuario } = req.params;
-      if (!id_usuario) {
-          return res.status(400).json({ msg: 'El ID del usuario es requerido' });
-      }
-
-      const usuarioExistente = await usuario.findById(id_usuario);
-      if (!usuarioExistente) {
-          return res.status(404).json({ msg: 'Usuario no encontrado' });
-      }
-
-      await usuarioExistente.deleteOne();
-      res.status(200).json({ msg: 'Usuario eliminado correctamente' });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Hubo un error al eliminar el usuario' });
-  }
-};
-*/
 const listarModeradores = async (req, res) => {
   try {
     const moderadores = await Moderador.find()
@@ -403,58 +374,9 @@ const eliminarModerador = async (req, res) => {
   }
 };
 
-/*const crearUsuario = async (req, res) => {
-  try {
-    // Validar campos requeridos
-    const requiredFields = ["nombre", "apellido", "email", "password"];
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ msg: `El campo ${field} es obligatorio` });
-      }
-    }
-
-    const { nombre, apellido, email, password } = req.body;
-
-    // Verificar si el correo ya está registrado
-    const usuarioExistente = await usuario.findOne({ email });
-    if (usuarioExistente) {
-      return res.status(400).json({ msg: "El email ya está registrado" });
-    }
-
-    // Crear nuevo usuario
-    const nuevoUsuario = new usuario({
-      nombre,
-      apellido,
-      email,
-      password: await usuario.prototype.encrypPassword(password),
-    });
-
-    // Generar token para confirmar el correo
-    const token = nuevoUsuario.crearToken();
-
-    // Guardar usuario en la base de datos
-    await nuevoUsuario.save();
-
-    // Retornar respuesta exitosa
-    res.status(201).json({
-      msg: "Usuario creado exitosamente. Revisa tu correo para confirmar tu cuenta.",
-      usuario: {
-        nombre: nuevoUsuario.nombre,
-        apellido: nuevoUsuario.apellido,
-        email: nuevoUsuario.email,
-        confirmEmail: nuevoUsuario.confirmEmail,
-        propietario: nuevoUsuario.propietario,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Hubo un error al crear el usuario", error: error.message });
-  }
-};
-*/
 const obtenerUsuariosPorMes = async (req, res) => {
   try {
-    const usuariosPorMes = await usuario.aggregate([
+    const usuariosPorMes = await Usuario.aggregate([
       {
         $group: {
           _id: {
@@ -484,14 +406,12 @@ const obtenerUsuariosPorMes = async (req, res) => {
   }
 };
 
-
-const listarEstadisticas = async (req, res) => {
+const listarEstadisticasMod = async (req, res) => {
   try {
-    // Contar todos los usuarios que no son moderadores
-    const cantidadUsuarios = await usuario.countDocuments({ moderador: { $ne: true } });
+    const { id_tienda } = req.body;
 
-    // Contar todos los usuarios que son propietarios (es decir, tienen tienda)
-    const cantidadUsuariosPropietarios = await usuario.countDocuments({ propietario: true });
+    // Contar todos los usuarios
+    const cantidadUsuarios = await Usuario.countDocuments();
 
     // Contar todas las tiendas registradas (documentos en la colección 'tiendas')
     const cantidadTiendasRegistradas = await Tienda.countDocuments();  // Aquí contamos las tiendas
@@ -499,12 +419,54 @@ const listarEstadisticas = async (req, res) => {
     // Contar todos los productos en total
     const cantidadProductos = await Producto.countDocuments();
 
-    // Devolver las estadísticas
+    let productos;
+    if (id_tienda === "") {
+      // Si el usuario es moderador, mostrar todos los productos
+      productos = await Producto.find();
+    } else {
+      productos = await Producto.countDocuments({id_tienda : id_tienda});
+    }
+
+    // Devolver las estadísticas y los productos
     res.status(200).json({
       cantidadUsuarios,
-      cantidadUsuariosPropietarios,
       cantidadTiendasRegistradas,  // Esta línea cuenta las tiendas registradas
-      cantidadProductos
+      cantidadProductos,
+      productos
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Hubo un error en el servidor", error: error.message });
+  }
+};
+
+const listarEstadisticas = async (req, res) => {
+  try {
+    const { id_tienda } = req.params;
+
+    // Contar todos los usuarios
+    const cantidadUsuarios = await Usuario.countDocuments();
+
+    // Contar todas las tiendas registradas (documentos en la colección 'tiendas')
+    const cantidadTiendasRegistradas = await Tienda.countDocuments();  // Aquí contamos las tiendas
+
+    // Contar todos los productos en total
+    const cantidadProductos = await Producto.countDocuments();
+
+    let productos;
+    if (id_tienda === "") {
+      // Si el usuario es moderador, mostrar todos los productos
+      productos = await Producto.find();
+    } else {
+      productos = await Producto.countDocuments({id_tienda : id_tienda});
+    }
+
+    // Devolver las estadísticas y los productos
+    res.status(200).json({
+      cantidadUsuarios,
+      cantidadTiendasRegistradas,  // Esta línea cuenta las tiendas registradas
+      cantidadProductos,
+      productos
     });
   } catch (error) {
     console.error(error);
@@ -541,7 +503,7 @@ const obtenerTiendaPorId = async (req, res) => {
 
   try {
     // Buscar la tienda en la base de datos usando el ID proporcionado
-    const tienda = await Tienda.findById(id).populate('id_propietario', 'nombre apellido'); // Populate para obtener datos del usuario (si es necesario)
+    const tienda = await Tienda.findById(id).populate('id_usuario', 'nombre apellido'); // Populate para obtener datos del usuario (si es necesario)
     
     // Verificar si la tienda existe
     if (!tienda) {
@@ -583,48 +545,6 @@ const obtenerModerador = async (req, res) => {
   }
 };
 
-const obtenerProductosPorMes = async (req, res) => {
-  const { id_tienda } = req.params; 
-
-  try {
-    const productosPorMes = await Producto.aggregate([
-      {
-        $match: { id_tienda: id_tienda.toString() } // Convertir a string por si llega como ObjectID
-      },
-      {
-        $group: {
-          _id: {
-            año: { $year: "$createdAt" },
-            mes: { $month: "$createdAt" }
-          },
-          total: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { "_id.año": 1, "_id.mes": 1 }
-      },
-      {
-        $project: {
-          _id: 0,
-          año: "$_id.año",
-          mes: "$_id.mes",
-          total: 1
-        }
-      }
-    ]);
-
-    if (productosPorMes.length === 0) {
-      return res.status(200).json([]); // Devolver array vacío si no hay datos
-    }
-
-    res.status(200).json(productosPorMes);
-  } catch (error) {
-    console.error('Error al obtener los productos:', error);
-    res.status(500).json({ msg: "Hubo un error al obtener los productos por mes", error: error.message });
-  }
-};
-
-
 export {
   login,
   registro,
@@ -641,16 +561,14 @@ export {
   listarproductosporCategoria,
   confirmEmail,
   desactivarTienda,  // Agregado
-  eliminarProducto, // Se mantiene la función de eliminar producto
-  //eliminarUsuario,
+  eliminarProducto,
   listarModeradores,
   eliminarModerador,
-  //crearUsuario,
   obtenerUsuariosPorMes,
   listarEstadisticas,
+  listarEstadisticasMod,
   obtenerUltimos10Productos,
   obtenerTiendaPorId,
-  obtenerModerador,
-  obtenerProductosPorMes
+  obtenerModerador
 };
 
