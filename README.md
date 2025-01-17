@@ -47,7 +47,7 @@ La documentación completa de los endpoints del backend se encuentra disponible 
 ## Manual de usuario
 Para entender cómo utilizar el sistema, consulta el siguiente video que explica su uso:
 
-[![Manual de usuario](https://www.youtube.com/watch?v=b9xJzr7jLTs)
+[Manual de usuario](https://www.youtube.com/watch?v=b9xJzr7jLTs)
 
 ## Autor
 **Yuverly Alexander Verdezoto Lojan**
